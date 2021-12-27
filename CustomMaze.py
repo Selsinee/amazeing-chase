@@ -51,7 +51,7 @@ class agent:
     Or they can be the physical agents (like robots)
     They can have two shapes (square or arrow)
     '''
-    def __init__(self,parentMaze,x=None,y=None,type="cat",goal=None,color:COLOR=COLOR.blue):
+    def __init__(self,parentMaze,x=None,y=None,type="cat",goal=None,color:COLOR=COLOR.blue, callback=None):
         '''
         parentmaze-->  The maze on which agent is placed.
         x,y-->  Position of the agent i.e. cell inside which agent will be placed
@@ -76,6 +76,7 @@ class agent:
         '''
         self._parentMaze=parentMaze
         self.color=color
+        self.moveAgent = callback
         if(isinstance(color,str)):
             if(color in COLOR.__members__):
                 self.color=COLOR[color]
@@ -200,17 +201,21 @@ class agent:
     def moveRight(self,event):
         if self._parentMaze.maze_map[self.x,self.y]['E']==True:
             self.y=self.y+1
+            self.moveAgent()
     def moveLeft(self,event):
         if self._parentMaze.maze_map[self.x,self.y]['W']==True:
             self.y=self.y-1
+            self.moveAgent()
     def moveUp(self,event):
         if self._parentMaze.maze_map[self.x,self.y]['N']==True:
             self.x=self.x-1
             self.y=self.y
+            self.moveAgent()
     def moveDown(self,event):
         if self._parentMaze.maze_map[self.x,self.y]['S']==True:
             self.x=self.x+1
             self.y=self.y
+            self.moveAgent()
 class textLabel:
     '''
     This class is to create Text Label to show different results on the window.
@@ -427,7 +432,7 @@ class maze:
                 except:
                     print('Path to goal not found!')
                     return
-            return fwdPath
+            return fwdPath      
         # if maze is to be generated randomly
         if not loadMaze:
             _stack.append((x,y))
@@ -660,20 +665,18 @@ class maze:
         self._win.bind('<d>',a.moveRight)
         self._win.bind('<w>',a.moveUp)
         self._win.bind('<s>',a.moveDown)
-
-    _tracePathList=[]
-    def _tracePathSingle(self,a,p,kill,showMarked,delay):
-        '''
-        An interal method to help tracePath method for tracing a path by agent.
-        '''
-        
-        def killAgent(a):
+    def killAgent(self, a):
             '''
             if the agent should be killed after it reaches the Goal or completes the path
             '''
             for i in range(len(a._body)):
                 self._canvas.delete(a._body[i])
-            self._canvas.delete(a._head) 
+            self._canvas.delete(a._head)
+    _tracePathList=[]
+    def _tracePathSingle(self,a,p,kill,showMarked,delay):
+        '''
+        An interal method to help tracePath method for tracing a path by agent.
+        ''' 
         w=self._cell_width
         if((a.x,a.y) in self.markCells and showMarked):
             w=self._cell_width
@@ -828,6 +831,11 @@ class maze:
                 if a.goal!=(a.x,a.y) and len(p)!=0:
                     self._tracePathSingle(a,p,kill,showMarked,delay)
 
+    def getPathToAgent(self, a, goal):
+        return 0
+
+    def moveAgents(self, a, goal):
+        self.getPathToAgent(a, goal)
 
     def run(self):
         '''
