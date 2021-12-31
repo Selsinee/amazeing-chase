@@ -51,7 +51,7 @@ class agent:
     Or they can be the physical agents (like robots)
     They can have two shapes (square or arrow)
     '''
-    def __init__(self,parentMaze,x=None,y=None,type="cat",goal=None,color:COLOR=COLOR.blue, callback=None):
+    def __init__(self,parentMaze,x=None,y=None,type="cat",goal=None,color:COLOR=COLOR.blue, move=None, isGoal=None):
         '''
         parentmaze-->  The maze on which agent is placed.
         x,y-->  Position of the agent i.e. cell inside which agent will be placed
@@ -76,7 +76,8 @@ class agent:
         '''
         self._parentMaze=parentMaze
         self.color=color
-        self.moveAgent = callback
+        self.moveAgent = move
+        self.isGoal = isGoal
         if(isinstance(color,str)):
             if(color in COLOR.__members__):
                 self.color=COLOR[color]
@@ -136,7 +137,7 @@ class agent:
                         pass
                 self._parentMaze._redrawCell(self.x,self.y,theme=self._parentMaze.theme)
             if (self.type != "goal" and self.x == self.goal[0] and self.y == self.goal[1]):
-                print("goal!!")
+                self.isGoal()
         else:
             if self.type == "goal":
                 self._head=self._parentMaze._canvas.create_rectangle(*self._coord, fill=self.color.value[0],outline='') 
@@ -692,7 +693,7 @@ class maze:
                 if len(maze._tracePathList)>0:
                     self.tracePath(maze._tracePathList[0][0],kill=maze._tracePathList[0][1],delay=maze._tracePathList[0][2])
             if kill:
-                self._win.after(300, killAgent,a)         
+                self._win.after(300, self.killAgent,a)         
             return
         # If path is provided as Dictionary
         if(type(p)==dict):
@@ -745,7 +746,7 @@ class maze:
                         self.tracePath(maze._tracePathList[0][0],kill=maze._tracePathList[0][1],delay=maze._tracePathList[0][2])
                 if kill:
                     
-                    self._win.after(300, killAgent,a)         
+                    self._win.after(300, self.killAgent,a)         
                 return
             # if a.type=='square' or mov==o:    
             move=p[0]
@@ -777,7 +778,7 @@ class maze:
                     if len(maze._tracePathList)>0:
                         self.tracePath(maze._tracePathList[0][0],kill=maze._tracePathList[0][1],delay=maze._tracePathList[0][2])
                 if kill:                    
-                    self._win.after(300, killAgent,a)  
+                    self._win.after(300, self.killAgent,a)  
                 return
             if a.type=='arrow':
                 old=(a.x,a.y)
@@ -831,12 +832,12 @@ class maze:
                 if a.goal!=(a.x,a.y) and len(p)!=0:
                     self._tracePathSingle(a,p,kill,showMarked,delay)
 
-    def getPathToAgent(self, a, goal):
-        return 0
-
-    def moveAgents(self, a, goal):
-        self.getPathToAgent(a, goal)
-
+    def withdraw(self):
+        self._win.withdraw()
+        
+    def destroy(self):
+        self._win.destroy()
+        
     def run(self):
         '''
         Finally to run the Tkinter Main Loop

@@ -1,7 +1,10 @@
-from CustomMaze import maze, agent, COLOR
+from CustomMaze import maze, agent
 # from pyamaze import maze
 from tkinter import *
+from tkinter import messagebox
 from queue import PriorityQueue
+
+started = False;
 
 def manhattanDistance(cell1, cell2):
     x1, y1 = cell1
@@ -46,18 +49,49 @@ def aStar(m, start, goal):
         cell = path[cell]
     return fwdPath
 
+def on_closing(item):
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        item.destroy()
 
 def startGame():
-    root.destroy()
-    m = maze(9, 9)
+    global started
+    if (started == False):
+        root.destroy()
+        started = True
     def moveAgent():
         path = aStar(m, b.position, a.position)
         nextCell = path[b.position]
         b.position = nextCell
         if (b.position == a.position):
             m.killAgent(a)
+            gameOver(False)
+
+    def gameOver(won=True):
+        win = Toplevel()
+        win.geometry('600x300')
+        win.title("A-maze-ing Chase")
+        win.protocol("WM_DELETE_WINDOW", lambda:closeAll())
+        if won == True: 
+            text = "You Won!"
+        else: text = "You Lost!"
+        Label(win, font="cmr 40 bold", text=text).pack(pady= 30)
+        Button(win, text="RESTART", width=15, pady=10, font="cmr 15 bold", bg="gray11", borderwidth=0, foreground='white', command=lambda:destroyAll(True)).pack()
+        Button(win, text="QUIT", width=15, pady=10, font="cmr 15 bold", borderwidth=0, foreground='black', command=lambda:destroyAll()).pack()
+
+        def destroyAll(start=False):
+            win.destroy()
+            m.destroy()
+            if start == True:
+                startGame()
+
+        def closeAll():
+            on_closing(win)
+            m.destroy()
+            
+
+    m = maze(9, 9)
     m.CreateMaze(loopPercent=30)
-    a = agent(m, 9, 9, type="cat", callback=lambda:moveAgent())
+    a = agent(m, 9, 9, type="cat", move=lambda:moveAgent(), isGoal=lambda:gameOver(True))
     b = agent(m, 1, 9, type="ghost")
     m.enableArrowKey(a)
     m.run()
@@ -67,6 +101,7 @@ root = Tk()
 canvas = Canvas(root, width= 350)
 root.title("A-maze-ing Chase")
 root.geometry("600x300")
+root.protocol("WM_DELETE_WINDOW", lambda:on_closing(root))
 Label(canvas, font="cmr 40 bold", text="A-maze-ing Chase").pack(pady= 30)
 Button(canvas, text="START", width=15, pady=10, font="cmr 15 bold", bg="gray11", borderwidth=0, foreground='white', command=lambda:startGame()).pack()
 canvas.pack()
