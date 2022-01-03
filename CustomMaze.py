@@ -112,13 +112,13 @@ class agent:
         w=self._parentMaze._cell_width
         x=self.x*w-w+self._parentMaze._LabWidth
         y=self.y*w-w+self._parentMaze._LabWidth
-        self.image = PhotoImage(file='assets/cat-white.png')
+        self.image = PhotoImage(file='./assets/cat-white.png')
 
         self._coord=(y, x, y + w, x + w)
         if self.type == 'cat':
-            self.image = PhotoImage(file='assets/cat-white.png')
+            self.image = PhotoImage(file='./assets/cat-white.png')
         elif self.type == 'ghost':
-            self.image = PhotoImage(file='assets/ghost-white.png')
+            self.image = PhotoImage(file='./assets/ghost-white.png')
         
         if(hasattr(self,'_head')):
             self._parentMaze._canvas.delete(self._head)
